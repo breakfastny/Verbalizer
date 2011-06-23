@@ -119,7 +119,6 @@ class VerbalizerApp : public ofBaseApp {
 	
 		bool bt_audio_in;
 		bool bt_audio_out;
-	
 		bool activated;
 	
 		// UI
