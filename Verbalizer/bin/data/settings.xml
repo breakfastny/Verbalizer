@@ -1,0 +1,43 @@
+<settings>
+    
+    <!-- URL to open when activated -->
+    <!--<url>http://encrypted.google.com/</url>-->
+	<url>http://www.google.com/</url>
+	
+    <!-- Sound file to play when we get the activation command -->
+    <mp3_file_started>speak_now.mp3</mp3_file_started>
+	
+    <!-- Sound file to play to prompt user to speek -->
+    <mp3_file_ready>speak_now.mp3</mp3_file_ready>
+	
+    <!-- Timeing between playing second sound and activating the voice input mic.
+	This setting should probably be around the same length as the mp3_file_ready 
+	files length. If no mp3_file_ready is specified, set this value to 0. -->
+    <activation_delay>120</activation_delay>
+	<timeout_while_playing_started_mp3>0</timeout_while_playing_started_mp3>
+    
+    <!-- Use verbalizer onboard audio in 1=on 0=off -->
+    <bt_audio_in>1</bt_audio_in>
+
+    <!-- Use verbalizer onboard audio out 1=on 0=off -->
+    <bt_audio_out>1</bt_audio_out>
+    
+    <!-- tmp file -->
+    <tmp_file>/tmp/voice_search.png</tmp_file>
+	
+	<!--==== ADVANCED SETTINGS ====-->
+	
+    <!-- cvMatchTemplate min_loc to signify match -->
+    <cv_min_loc>271652</cv_min_loc>
+	<!-- Number of tries to find satisfying match -->
+    <cv_min_loc_tries>10</cv_min_loc_tries>
+	<!-- Timer between tries in milliseconds -->
+    <cv_min_loc_timout>500</cv_min_loc_timeout>
+	<!-- ms to wait before sending command again if no ack has been received -->
+	<command_retry_interval>500</command_retry_interval>
+    <!-- number of times to retry before giving up on ack -->
+	<command_number_of_retries>2</command_number_of_retries>
+    <!-- ms between mouse click to done -->
+	<timer_search_done>7000</timer_search_done>	
+	
+</settings>
