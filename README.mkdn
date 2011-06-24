@@ -4,8 +4,8 @@ The Verbalizer
 The Verbalizer is an open source hardware and software platform originally built for activating and performing Google's Voice Search for desktop. The platform is developed with amatuers and home tinkeres in mind, so it's got a low barrier of entry. The hardware is [Arduino-Compatible](http://arduino.cc/) and the desktop software is build on top of [OpenFrameworks](http://www.openframeworks.cc/).
 
 
-The Harware Board
-=================
+The Hardware Board
+==================
 
 The Verbalizer board is a microcontroller board based on ATMega328. It's Arduino-Compatible so all you need is a mini-USB cable and the Arduino IDE to start hacking. In addition to most of the features you normally expect from an Arduino board, it has an onboard bluetooth module (Liard BTM511) which supports audio profiles (HFP) and serial data (SPP) communication. It also features 2 built in capacitive touch sensors. 
 
