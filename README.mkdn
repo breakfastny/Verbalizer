@@ -21,5 +21,10 @@ get lost due to naive programming (such as sleep/delays which are common in the 
 
 The desktop app is built on top of OpenFrameworks and is heavily tied to the OS X platform by using it's `IOBluetooth.framework` and `CoreAudio`.
 
+Contributors
+============
+
+*   BREAKFAST
+*   Zach Eveland, Blacklabel Development
 
 [Verbalizer homepage](http://breakfastny.com/verbalizer)
