@@ -72,6 +72,7 @@ const char STATUS_DONE		= 0x84;
 const char STATUS_CONNECTED	= 0x85;
 const char ACK_OK		= 0x86;
 const char ACK_BAD		= 0x87;
+const char HEARTBEAT            = 0x88;
 
 void setup() {
   digitalWrite(vuLEDpin, LOW);
@@ -108,6 +109,8 @@ boolean buttonPressed = false;
 char lastCommand = 0;
 boolean waitingForAck = false;
 boolean voiceSearchActive = false;
+long lastHeartbeat = 0;
+boolean isConnected = false;
 
 long lastBatteryTestTime = 0;
 long lastMicLvlTime = 0;
@@ -115,10 +118,18 @@ ChargingState chgState = notCharging;
 int micLvls[] = {
   0, 0, 0, 0, 0};
 
-// notes for first trigger
-int melody[] = {NOTE_D7, NOTE_D7, NOTE_E7, NOTE_A7};
-// note durations: 4 = quarter note, 8 = eighth note, etc.:
-int noteDurations[] = {12, 12, 12, 8};
+
+// ======= SOUNDS AND MELODIES
+// connected
+int melConnected[] = {NOTE_D6, NOTE_D7};
+int durConnected[] = {4, 8};
+// activate
+int melActivate[] = {NOTE_D7, NOTE_D7, NOTE_E7, NOTE_A7};
+int durActivate[] = {12, 12, 12, 8};
+// not connected
+int melNotConnected[] = {NOTE_C6, NOTE_D5};
+int durNotConnected[] = {12, 12};
+
 
 
 void loop() {
@@ -139,21 +150,13 @@ void loop() {
   // Activate voice search
   // When user starts touching the sensor
   if ((leftSns > 210 || rightSns > 210) && buttonPressed == false) {
-    analogWrite(vuLEDpin, 255); // turn on light
-    btSerial.print(CMD_ACTIVATE);
     buttonPressed = true;
-    waitingForAck = true;
-    Serial.println("activate");
-    playNotes(melody, noteDurations, sizeof(melody) / sizeof(int));
+    startActivation();
   }
   // Finish the activation when the user releases the touch sensor
   else if (leftSns < 100 && rightSns < 100 && buttonPressed == true) {
-    btSerial.print(CMD_FINISHED);
     buttonPressed = false;
-    waitingForAck = true;
-    Serial.println("finished");
-    // take down light
-    analogWrite(vuLEDpin, 0);
+    finishActivation();
   }
 
   
@@ -257,7 +260,6 @@ void loop() {
     
       case STATUS_READY:
         btSerial.print(ACK_OK); // let app know we got the command
-        
         // Blink the VU meter on
         analogWrite(vuLEDpin, 255);
         delay(200);
@@ -267,22 +269,23 @@ void loop() {
       
       case STATUS_DONE:
         btSerial.print(ACK_OK);
-        
         // Turn the VU meter off
         analogWrite(vuLEDpin, 0);
         voiceSearchActive = false;
         break;
        
-        case STATUS_CONNECTED:
-          btSerial.print(ACK_OK);
-        break;
-        
-        case 0x57:
-          Serial.print("GOT w");
-        break;
-                
+      case STATUS_CONNECTED:
+        btSerial.print(ACK_OK);
+        isConnected = true;
+        playNotes(melConnected, durConnected, sizeof(melConnected) / sizeof(int));
+      break;
+      
+      case HEARTBEAT:
+        lastHeartbeat = millis();
+        isConnected = true;
+      break;
+      
       default:
-          
       break;
     }
   }
@@ -306,6 +309,14 @@ void loop() {
   if (chgState == charging && millis() - lastBatteryTestTime > 100) {
     digitalWrite(greenLEDpin, HIGH);
   }
+  
+  
+  // ========= HEARTBEAT / CONNECTION ALIVE
+  // Check that we've been getting heartbeats
+  if (millis() - lastHeartbeat > 5000) {
+    isConnected = false;
+    analogWrite(vuLEDpin, 0);
+  }
 
 
   /*
@@ -326,6 +337,31 @@ void loop() {
   }
   */
   
+}
+
+
+void startActivation () {
+  if (isConnected) {
+    Serial.println("activate");
+    btSerial.print(CMD_ACTIVATE);
+    waitingForAck = true;
+    analogWrite(vuLEDpin, 255); // turn on light
+    playNotes(melActivate, durActivate, sizeof(melActivate) / sizeof(int));
+  }else{
+    Serial.println("not connected");
+    playNotes(melNotConnected, durNotConnected, sizeof(melNotConnected) / sizeof(int));
+  }
+}
+
+void finishActivation () {
+  if (isConnected) {
+    Serial.println("finish");
+    btSerial.print(CMD_FINISHED);
+    waitingForAck = true;
+    analogWrite(vuLEDpin, 0);
+  }else{
+    //
+  }
 }
 
 

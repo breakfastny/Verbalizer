@@ -26,7 +26,6 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  *  Author: Zachary Eveland, Blacklabel Development 
- *   and Mattias Gunneras, BREAKFAST
  *
  */
 

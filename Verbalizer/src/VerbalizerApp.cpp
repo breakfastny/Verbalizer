@@ -98,6 +98,9 @@ void VerbalizerApp::setup() {
 	ofAddListener(timer_command_ack.time_up, this, &VerbalizerApp::onTimerCommandAck);
 	ofAddListener(timer_clear_last_in_s.time_up, this, &VerbalizerApp::onTimerClearLastInString);
 	ofAddListener(timer_search_done.time_up, this, &VerbalizerApp::onTimerSearchDone);
+	ofAddListener(timer_heartbeat.time_up, this, &VerbalizerApp::onTimerSendHeartbeat);
+	
+	heartbeat_interval = XML.getValue("settings:timer_heartbeat", 2000);
 }
 
 //--------------------------------------------------------------
@@ -191,7 +194,7 @@ void VerbalizerApp::sendCommand(char cmd, bool first_call) {
 
 //--------------------------------------------------------------
 void VerbalizerApp::sendSerialData(char cmd) {
-	if (channel == NULL) { return; }
+	if (channel == NULL || !bluetoothConnected) { return; }
 	char c_arr[2];
 	c_arr[0] = cmd;
 	btutil.sendRFCOMMData(channel, c_arr, 1);
@@ -273,6 +276,12 @@ void VerbalizerApp::onTimerSearchDone(ofEventArgs &args) {
 }
 
 //--------------------------------------------------------------
+void VerbalizerApp::onTimerSendHeartbeat(ofEventArgs &args) {
+	sendSerialData(HEARTBEAT);
+	timer_heartbeat.start(heartbeat_interval);
+}
+
+//--------------------------------------------------------------
 void VerbalizerApp::onBluetoothConnect (IOBluetoothObjectRef &dev) {
 	// Setup a comm cannel to the BT device that was picked.
 
@@ -293,6 +302,7 @@ void VerbalizerApp::onBluetoothConnect (IOBluetoothObjectRef &dev) {
 		channel = btutil.openRFCOMMChannel(device);
 		
 		sendCommand(STATUS_CONNECTED, true);
+		timer_heartbeat.start(heartbeat_interval);
 		
 	}else{
 		printf("Unknown BT device connected, ignoring it.\n");
@@ -324,6 +334,7 @@ void VerbalizerApp::onBluetoothDisconnect (IOBluetoothObjectRef &dev) {
 	connect_btn.setBlur(false);
 	disconnect_btn.enabled = false;
 	bluetoothConnected = false;
+	timer_heartbeat.stop();
 }
 
 //--------------------------------------------------------------

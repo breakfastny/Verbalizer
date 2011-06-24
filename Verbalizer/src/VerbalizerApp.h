@@ -61,6 +61,7 @@ const char STATUS_DONE		= 0x84;
 const char STATUS_CONNECTED	= 0x85;
 const char ACK_OK			= 0x86;
 const char ACK_BAD			= 0x87;
+const char HEARTBEAT        = 0x88;
 
 //========================================================================
 class VerbalizerApp : public ofBaseApp {
@@ -104,6 +105,7 @@ class VerbalizerApp : public ofBaseApp {
 		void onTimerCommandAck(ofEventArgs &args);
 		void onTimerClearLastInString(ofEventArgs &args);
 		void onTimerSearchDone(ofEventArgs &args);
+		void onTimerSendHeartbeat(ofEventArgs &args);
 		
 		string xml_file;
 		ofxXmlSettings XML;
@@ -115,7 +117,9 @@ class VerbalizerApp : public ofBaseApp {
 		CBTimer timer_check_page;
 		CBTimer timer_click;
 		CBTimer timer_search_done;
+		CBTimer timer_heartbeat;
 		int page_load_check_counter;
+		int heartbeat_interval;
 	
 		bool bt_audio_in;
 		bool bt_audio_out;
