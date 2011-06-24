@@ -40,7 +40,7 @@
     <!-- ms between mouse click to done -->
 	<timer_search_done>7000</timer_search_done>	
 	<!-- ms between heartbeats -->
-	<timer_heartbeat>2000</timer_heartbeat>	
+	<timer_heartbeat>1500</timer_heartbeat>	
 	
 	
 </settings>
