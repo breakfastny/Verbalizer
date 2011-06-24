@@ -278,7 +278,7 @@ void VerbalizerApp::onTimerSearchDone(ofEventArgs &args) {
 //--------------------------------------------------------------
 void VerbalizerApp::onTimerSendHeartbeat(ofEventArgs &args) {
 	sendSerialData(HEARTBEAT);
-	timer_heartbeat.start(heartbeat_interval);
+	timer_heartbeat.start(heartbeat_interval); // loop heartbeat
 }
 
 //--------------------------------------------------------------

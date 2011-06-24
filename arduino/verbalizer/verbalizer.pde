@@ -122,7 +122,7 @@ int micLvls[] = {
 // ======= SOUNDS AND MELODIES
 // connected
 int melConnected[] = {NOTE_D6, NOTE_D7};
-int durConnected[] = {4, 8};
+int durConnected[] = {8, 8};
 // activate
 int melActivate[] = {NOTE_D7, NOTE_D7, NOTE_E7, NOTE_A7};
 int durActivate[] = {12, 12, 12, 8};
