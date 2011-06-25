@@ -317,11 +317,10 @@ void loop() {
     isConnected = false;
     analogWrite(vuLEDpin, 0);
   }
-
-
-  /*
+  
+  
   // ========= MIC LEVELS
-  if (millis() - lastMicLvlTime > 10) {
+  if (millis() - lastMicLvlTime > 100 && voiceSearchActive) {
     int micMax = 0;
     int micMin = 1023;
     for (int i=sizeof(micLvls)-1; i; i--) {
@@ -334,9 +333,10 @@ void loop() {
     micMin = min(micMin, micLvls[0]);
     int diff = 434 - micMin;    
     analogWrite(vuLEDpin, map(micMax, 512, 1024, 0, 255));    
+    lastMicLvlTime = millis();
   }
-  */
   
+
 }
 
 
@@ -345,10 +345,13 @@ void startActivation () {
     Serial.println("activate");
     btSerial.print(CMD_ACTIVATE);
     waitingForAck = true;
-    analogWrite(vuLEDpin, 255); // turn on light
+    // VU LEDs should be brought down while playing sounds since they 
+    // use too much current while playing sounds.
+    analogWrite(vuLEDpin, 0); 
     playNotes(melActivate, durActivate, sizeof(melActivate) / sizeof(int));
   }else{
     Serial.println("not connected");
+    analogWrite(vuLEDpin, 0);
     playNotes(melNotConnected, durNotConnected, sizeof(melNotConnected) / sizeof(int));
   }
 }
@@ -388,7 +391,9 @@ void playNotes(int melody[], int noteDurations[], int numNotes) {
   
      // stop the tone playing:
      noTone(spkrPin);
-
-   }   
+   }
+   // The speaker transistor needs to be brought high
+   // in order to avoid damage to the speaker.
+   digitalWrite(spkrPin, HIGH); 
 }
 
