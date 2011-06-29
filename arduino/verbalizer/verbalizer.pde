@@ -345,8 +345,8 @@ void startActivation () {
     Serial.println("activate");
     btSerial.print(CMD_ACTIVATE);
     waitingForAck = true;
-    // VU LEDs should be brought down while playing sounds since they 
-    // use too much current while playing sounds.
+    // VU LEDs should be brought down while playing sounds since 
+    // together they use too much current.
     analogWrite(vuLEDpin, 0); 
     playNotes(melActivate, durActivate, sizeof(melActivate) / sizeof(int));
   }else{
@@ -360,7 +360,6 @@ void finishActivation () {
   if (isConnected) {
     Serial.println("finish");
     btSerial.print(CMD_FINISHED);
-    waitingForAck = true;
     analogWrite(vuLEDpin, 0);
   }else{
     //
