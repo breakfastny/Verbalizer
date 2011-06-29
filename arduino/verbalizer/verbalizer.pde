@@ -129,7 +129,9 @@ int durActivate[] = {12, 12, 12, 8};
 // not connected
 int melNotConnected[] = {NOTE_C6, NOTE_D5};
 int durNotConnected[] = {12, 12};
-
+// ready to speak
+int melReady[] = {NOTE_D7};
+int durReady[] = {12};
 
 
 void loop() {
@@ -260,18 +262,19 @@ void loop() {
     
       case STATUS_READY:
         btSerial.print(ACK_OK); // let app know we got the command
+        voiceSearchActive = true;
         // Blink the VU meter on
         analogWrite(vuLEDpin, 255);
         delay(200);
         analogWrite(vuLEDpin, 0);
-        voiceSearchActive = true;
+        playNotes(melReady, durReady, sizeof(melReady) / sizeof(int));
         break;
       
       case STATUS_DONE:
         btSerial.print(ACK_OK);
+        voiceSearchActive = false;
         // Turn the VU meter off
         analogWrite(vuLEDpin, 0);
-        voiceSearchActive = false;
         break;
        
       case STATUS_CONNECTED:
