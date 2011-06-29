@@ -325,7 +325,8 @@ void loop() {
   // Check that we've been getting heartbeats
   if (millis() - lastHeartbeat > 5000) {
     isConnected = false;
-    analogWrite(vuLEDpin, 0);
+    voiceSearchActive = false;
+    //digitalWrite(vuLEDpin, LOW);
   }
   
   
