@@ -383,17 +383,18 @@ void finishActivation () {
   }
 }
 
-
-
 // ===== PLAY NOTES THROUGH SPEAKER
 void playNotes(int melody[], int noteDurations[], int numNotes) {
   
     // Inspired by Tom Igoe's Tone tutorial 
     // http://arduino.cc/en/Tutorial/Tone
     
-   // VU LEDs should be brought down while playing sounds since 
+   // All LEDs should be brought down while playing sounds since 
    // together they use too much current.
    analogWrite(vuLEDpin, 0); 
+   digitalWrite(greenLEDpin, HIGH);
+   digitalWrite(redLEDpin, HIGH);
+   delay(100);
    
    // iterate over the notes of the melody:
    for (int thisNote = 0; thisNote < numNotes; thisNote++) {
@@ -415,5 +416,6 @@ void playNotes(int melody[], int noteDurations[], int numNotes) {
    // The speaker transistor needs to be brought high
    // in order to avoid damage to the speaker.
    digitalWrite(spkrPin, HIGH); 
+   delay(100);
 }
 
