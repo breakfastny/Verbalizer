@@ -73,6 +73,7 @@ const char STATUS_CONNECTED	= 0x85;
 const char ACK_OK		= 0x86;
 const char ACK_BAD		= 0x87;
 const char HEARTBEAT            = 0x88;
+const char STATUS_DISCONNECT    = 0x89;
 
 void setup() {
   digitalWrite(vuLEDpin, LOW);
@@ -111,6 +112,7 @@ boolean waitingForAck = false;
 boolean voiceSearchActive = false;
 long lastHeartbeat = 0;
 boolean isConnected = false;
+boolean wasConnected = false;
 
 long lastBatteryTestTime = 0;
 long lastMicLvlTime = 0;
@@ -121,17 +123,20 @@ int micLvls[] = {
 
 // ======= SOUNDS AND MELODIES
 // connected
-int melConnected[] = {NOTE_D6, NOTE_D7};
-int durConnected[] = {8, 8};
+int melConnect[] = {NOTE_D6, NOTE_D7};
+int durConnect[] = {8, 8};
 // activate
-int melActivate[] = {NOTE_D7, NOTE_D7, NOTE_E7, NOTE_A7};
-int durActivate[] = {12, 12, 12, 8};
+int melActivate[] = {NOTE_D7};
+int durActivate[] = {12};
 // not connected
 int melNotConnected[] = {NOTE_C6, NOTE_D5};
 int durNotConnected[] = {12, 12};
 // ready to speak
-int melReady[] = {NOTE_D7};
-int durReady[] = {12};
+int melReady[] = {NOTE_D7, NOTE_D7, NOTE_E7, NOTE_A7};
+int durReady[] = {12, 12, 12, 8};
+// Disconnect
+int melDisconnect[] = {NOTE_D5, NOTE_D4};
+int durDisconnect[] = {8, 8};
 
 
 void loop() {
@@ -256,8 +261,7 @@ void loop() {
     }
     
     // Execute commands depending on what 
-    // command we're getting from the
-    // desktop app.
+    // command we're getting from the desktop app.
     switch (c) {
     
       case STATUS_READY:
@@ -280,7 +284,10 @@ void loop() {
       case STATUS_CONNECTED:
         btSerial.print(ACK_OK);
         isConnected = true;
-        playNotes(melConnected, durConnected, sizeof(melConnected) / sizeof(int));
+      break;
+      
+      case STATUS_DISCONNECT:
+        isConnected = false;
       break;
       
       case HEARTBEAT:
@@ -293,7 +300,7 @@ void loop() {
     }
   }
 
-
+  
   
   // ====== BATTERY LEVEL
   // monitor battery charge progress
@@ -339,7 +346,17 @@ void loop() {
     lastMicLvlTime = millis();
   }
   
-
+  // ========= CHECK IF CONNECTION STATUS HAS CHANGED
+  if (wasConnected != isConnected) {
+    wasConnected = isConnected;
+    if(isConnected) {
+      playNotes(melConnect, durConnect, sizeof(melConnect) / sizeof(int));
+    }else{
+      playNotes(melDisconnect, durDisconnect, sizeof(melDisconnect) / sizeof(int));
+    }
+  }
+  
+  
 }
 
 
@@ -348,9 +365,6 @@ void startActivation () {
     Serial.println("activate");
     btSerial.print(CMD_ACTIVATE);
     waitingForAck = true;
-    // VU LEDs should be brought down while playing sounds since 
-    // together they use too much current.
-    analogWrite(vuLEDpin, 0); 
     playNotes(melActivate, durActivate, sizeof(melActivate) / sizeof(int));
   }else{
     Serial.println("not connected");
@@ -376,6 +390,10 @@ void playNotes(int melody[], int noteDurations[], int numNotes) {
   
     // Inspired by Tom Igoe's Tone tutorial 
     // http://arduino.cc/en/Tutorial/Tone
+    
+   // VU LEDs should be brought down while playing sounds since 
+   // together they use too much current.
+   analogWrite(vuLEDpin, 0); 
    
    // iterate over the notes of the melody:
    for (int thisNote = 0; thisNote < numNotes; thisNote++) {

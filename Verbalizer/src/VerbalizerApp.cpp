@@ -100,7 +100,7 @@ void VerbalizerApp::setup() {
 	ofAddListener(timer_search_done.time_up, this, &VerbalizerApp::onTimerSearchDone);
 	ofAddListener(timer_heartbeat.time_up, this, &VerbalizerApp::onTimerSendHeartbeat);
 	
-	heartbeat_interval = XML.getValue("settings:timer_heartbeat", 2000);
+	heartbeat_interval = XML.getValue("settings:timer_heartbeat", 1500);
 }
 
 //--------------------------------------------------------------
@@ -126,6 +126,9 @@ void VerbalizerApp::draw() {
 void VerbalizerApp::disconnectBluetooth() {
 	if(device != NULL && btutil.isConnected(device)) {
 		printf("Closing BT base band connection\n");
+		// send the disconnect status.
+		sendSerialData(STATUS_DISCONNECT);
+		sleep(1);
 		btutil.closeConnection(device);
 	}
 }
@@ -340,7 +343,8 @@ void VerbalizerApp::onBluetoothDisconnect (IOBluetoothObjectRef &dev) {
 //--------------------------------------------------------------
 void VerbalizerApp::onSerialData (IOBluetoothRFCOMMDataBlock &data) {
 	
-	if (data.dataSize == 0) {
+	if (!data.dataSize && data.dataSize == 0) {
+		printf("onSerialData. No dataSize\n");
 		return;
 	}
 	

@@ -62,6 +62,7 @@ const char STATUS_CONNECTED	= 0x85;
 const char ACK_OK			= 0x86;
 const char ACK_BAD			= 0x87;
 const char HEARTBEAT        = 0x88;
+const char STATUS_DISCONNECT= 0x89;
 
 //========================================================================
 class VerbalizerApp : public ofBaseApp {
