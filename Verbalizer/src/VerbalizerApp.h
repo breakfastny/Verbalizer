@@ -129,11 +129,13 @@ class VerbalizerApp : public ofBaseApp {
 		// UI
 		ofTrueTypeFont 	txt_device;
 		ofTrueTypeFont 	txt_status;
+		ofTrueTypeFont	txt_error;
 		ofImage bg;
 		spriteButton connect_btn;
 		spriteButton disconnect_btn;
 		spriteButton select_device_btn;
 		string status_msg;
+		string error_msg;
 		
 		// MatchFinder
 		screenCap sc;

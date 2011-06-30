@@ -44,10 +44,12 @@ void VerbalizerApp::setup() {
 	ofSetWindowTitle("Verbalizer");
 	device_name = "No device selected";
 	status_msg = "";
+	error_msg = "";
 
 	bg.loadImage(ofToDataPath("bg.png"));
 	txt_device.loadFont(ofToDataPath("LucidaGrande.ttc"), 10, true, false, false);
 	txt_status.loadFont(ofToDataPath("LucidaGrande.ttc"), 10, true, false, false);
+	txt_error.loadFont(ofToDataPath("LucidaGrande.ttc"), 10, true, false, false);
 	
 	connect_btn.setup(ofToDataPath("connect_btn.png"));
 	connect_btn.setBlur(true);
@@ -118,8 +120,13 @@ void VerbalizerApp::draw() {
 	ofPushStyle();
 	ofSetColor(0, 0, 0);
 	txt_device.drawString(device_name, 348, 159);
-	txt_status.drawString(status_msg, 348, 250);
+	txt_status.drawString(status_msg, 348, 230);
 	ofPopStyle();
+	
+	ofPushStyle();
+	ofSetColor(255, 0, 0);
+	txt_error.drawString(error_msg, 348, 270);
+	ofPopStyle();	
 }
 
 //--------------------------------------------------------------
@@ -128,7 +135,7 @@ void VerbalizerApp::disconnectBluetooth() {
 		printf("Closing BT base band connection\n");
 		// send the disconnect status.
 		sendSerialData(STATUS_DISCONNECT);
-		sleep(1);
+		usleep(1000 * 250); // quart second.
 		btutil.closeConnection(device);
 	}
 }
@@ -156,7 +163,7 @@ void VerbalizerApp::activateVoiceSearch() {
 	
 	// HELP!
 	// TODO: set timeout here, not sleep.
-	sleep(XML.getValue("settings:timeout_while_playing_started_mp3", 0) / 1000);
+	usleep(XML.getValue("settings:click_delay", 10));
 	
 }
 
@@ -246,8 +253,11 @@ void VerbalizerApp::onTimerCheckPage(ofEventArgs &args) {
 	// We've found the template so let's play the Ready sound.
 	playReadySound(false);
 	
+	// Tell board we're activating the mic
+	sendCommand(STATUS_READY, true);
+	usleep(1000 * 100); // wait half sec
 	// Start the timer for clicking on the template
-	timer_click.start(XML.getValue("settings:activation_delay", 100));
+	timer_click.start(XML.getValue("settings:activation_delay", 200));
 	activated = false;
 }
 
@@ -256,10 +266,6 @@ void VerbalizerApp::onTimerActivateMic(ofEventArgs &args) {
 	// Now we'll click to enable voice search
 	printf("Clicking %fx%f \n", point.x, point.y);
 	mouse.leftClick(point.x+(imgTpl.width/2), point.y+(imgTpl.height/2));
-	
-	// Tell board we're activating the mic
-	// Ok, we have a good match! First we should let our BT device know about it.
-	sendCommand(STATUS_READY, true);
 	
 	// Timeout for telling the board when the search is done.
 	// TODO: poll screenshot for updates and figure out when 
@@ -293,7 +299,11 @@ void VerbalizerApp::onBluetoothConnect (IOBluetoothObjectRef &dev) {
 		// Set the BT device as default in and output for audio.
 		if(bt_audio_in) {
 			printf("Setting BT device as default audio input\n");
-			audio_util.setInputDevice(btutil.deviceName(device));
+			if(!audio_util.setInputDevice(btutil.deviceName(device))) {
+				error_msg = "Error, could not connect onboard microphone!\nPlease try restarting bluetooth and connect again.";
+				disconnectBluetooth();
+				return;
+			}
 		}
 		
 		if(bt_audio_out) {
@@ -343,7 +353,7 @@ void VerbalizerApp::onBluetoothDisconnect (IOBluetoothObjectRef &dev) {
 //--------------------------------------------------------------
 void VerbalizerApp::onSerialData (IOBluetoothRFCOMMDataBlock &data) {
 	
-	if (!data.dataSize && data.dataSize == 0) {
+	if (!data.dataSize || data.dataSize == 0 || data.dataPtr == NULL) {
 		printf("onSerialData. No dataSize\n");
 		return;
 	}
@@ -393,7 +403,7 @@ void VerbalizerApp::handleSerialDataCommand(int cmd) {
 		// not implemented
 		waiting_for_ack = false;
 		timer_command_ack.stop();
-		printf("Got error response (n) from board!");
+		printf("Error ack from board.\n");
 	}
 	
 	// save in string in case we're getting hammered.
@@ -420,6 +430,7 @@ void VerbalizerApp::onBluetoothSerialFlow(IOBluetoothRFCOMMFlowControlStatus &st
 //--------------------------------------------------------------
 void VerbalizerApp::onConnectBtn(ofPoint &p) {
 	printf("Click Connect\n");
+	error_msg = "";
 	if(btutil.connect(device)) {
 		printf("Trying to connect...\n");
 		status_msg = "Connecting..";
