@@ -99,7 +99,7 @@ void setup() {
   Serial.begin(9600);  
   btSerial.begin(9600);
   
-  Serial.println("ready");
+  Serial.println("\n === BOOT ===\n");
   
   // ==== SET CUSTOM NAME
   //btSetName(idString);
@@ -133,7 +133,7 @@ int melNotConnected[] = {NOTE_C6, NOTE_D5};
 int durNotConnected[] = {12, 12};
 // ready to speak
 int melReady[] = {NOTE_D7, NOTE_D7, NOTE_E7, NOTE_A7};
-int durReady[] = {12, 12, 12, 8};
+int durReady[] = {16, 16, 16, 10};
 // Disconnect
 int melDisconnect[] = {NOTE_D5, NOTE_D4};
 int durDisconnect[] = {8, 8};
@@ -263,7 +263,7 @@ void loop() {
     // Execute commands depending on what 
     // command we're getting from the desktop app.
     switch (c) {
-    
+      
       case STATUS_READY:
         btSerial.print(ACK_OK); // let app know we got the command
         voiceSearchActive = true;
@@ -280,23 +280,23 @@ void loop() {
         // Turn the VU meter off
         analogWrite(vuLEDpin, 0);
         break;
-       
+      
       case STATUS_CONNECTED:
         btSerial.print(ACK_OK);
         isConnected = true;
-      break;
+        break;
       
       case STATUS_DISCONNECT:
         isConnected = false;
-      break;
+        break;
       
       case HEARTBEAT:
         lastHeartbeat = millis();
         isConnected = true;
-      break;
+        break;
       
       default:
-      break;
+        break;
     }
   }
 
@@ -316,6 +316,7 @@ void loop() {
     }
     lastBatteryTestTime = millis();
   }
+  
   if (chgState == charging && millis() - lastBatteryTestTime > 100) {
     digitalWrite(greenLEDpin, HIGH);
   }
@@ -326,35 +327,36 @@ void loop() {
   if (millis() - lastHeartbeat > 5000) {
     isConnected = false;
     voiceSearchActive = false;
-    //digitalWrite(vuLEDpin, LOW);
+    digitalWrite(vuLEDpin, LOW);
   }
   
-  
   // ========= MIC LEVELS
-  if (millis() - lastMicLvlTime > 100 && voiceSearchActive) {
+  if (millis() - lastMicLvlTime > 120 && voiceSearchActive) {
     int micMax = 0;
-    int micMin = 1023;
+    //int micMin = 1023;
     for (int i=sizeof(micLvls)-1; i; i--) {
       micLvls[i] = micLvls[i-1];
       micMax = max(micMax, micLvls[i]);
-      micMin = min(micMin, micLvls[i]);
+      //micMin = min(micMin, micLvls[i]);
     }
     micLvls[0] = analogRead(micLvlPin);    
     micMax = max(micMax, micLvls[0]);
-    micMin = min(micMin, micLvls[0]);
-    int diff = 434 - micMin;    
-    analogWrite(vuLEDpin, map(micMax, 512, 1024, 0, 255));    
+    //micMin = min(micMin, micLvls[0]);
+    //int diff = 434 - micMin;
+    //Serial.println(micLvlPin);
+    analogWrite(vuLEDpin, map(micMax, 512, 1024, 0, 200));
     lastMicLvlTime = millis();
   }
   
+  
   // ========= CHECK IF CONNECTION STATUS HAS CHANGED
   if (wasConnected != isConnected) {
-    wasConnected = isConnected;
     if(isConnected) {
       playNotes(melConnect, durConnect, sizeof(melConnect) / sizeof(int));
     }else{
       playNotes(melDisconnect, durDisconnect, sizeof(melDisconnect) / sizeof(int));
     }
+    wasConnected = isConnected;
   }
   
   
@@ -367,10 +369,12 @@ void startActivation () {
     btSerial.print(CMD_ACTIVATE);
     waitingForAck = true;
     playNotes(melActivate, durActivate, sizeof(melActivate) / sizeof(int));
+    delay(100);
   }else{
     Serial.println("not connected");
     analogWrite(vuLEDpin, 0);
     playNotes(melNotConnected, durNotConnected, sizeof(melNotConnected) / sizeof(int));
+    delay(100);
   }
 }
 
@@ -384,18 +388,19 @@ void finishActivation () {
   }
 }
 
+
+
 // ===== PLAY NOTES THROUGH SPEAKER
 void playNotes(int melody[], int noteDurations[], int numNotes) {
-  
+    //return;
     // Inspired by Tom Igoe's Tone tutorial 
     // http://arduino.cc/en/Tutorial/Tone
     
    // All LEDs should be brought down while playing sounds since 
    // together they use too much current.
-   analogWrite(vuLEDpin, 0); 
+   digitalWrite(vuLEDpin, LOW); 
    digitalWrite(greenLEDpin, HIGH);
    digitalWrite(redLEDpin, HIGH);
-   delay(100);
    
    // iterate over the notes of the melody:
    for (int thisNote = 0; thisNote < numNotes; thisNote++) {
@@ -404,7 +409,7 @@ void playNotes(int melody[], int noteDurations[], int numNotes) {
      // divided by the note type.
      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
      int noteDuration = 1000/noteDurations[thisNote];
-     tone(spkrPin, melody[thisNote],noteDuration);
+     tone(spkrPin, melody[thisNote], noteDuration);
      
      // to distinguish the notes, set a minimum time between them.
      // the note's duration + 30% seems to work well:
