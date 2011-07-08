@@ -1,6 +1,6 @@
 #include <NewSoftSerial.h>
 
-String idString = "Verbalizer 22";
+String idString = "Verbalizer 28";
 
 int pairingSwPin = 2;
 int chgStatDrvPin = 3;
@@ -28,7 +28,7 @@ void setup() {
   digitalWrite(chgStatDrvPin, LOW);
 
   pinMode(vuLEDpin, OUTPUT);
-  pinMode(greenLEDpin, OUTPUT);  
+  pinMode(greenLEDpin, OUTPUT);
   pinMode(redLEDpin, OUTPUT);
   pinMode(d8Pin, INPUT);
   pinMode(d9Pin, INPUT);
@@ -37,7 +37,7 @@ void setup() {
   pinMode(chgStatSnsPin, INPUT);
   pinMode(chgStatDrvPin, OUTPUT);
 
-  Serial.begin(9600);  
+  Serial.begin(9600);
   btSerial.begin(9600);
 }
 
@@ -73,43 +73,43 @@ void loop() {
 void btConfig(String permanentName) {  
   // perform factory reset:  
   btSerial.println("at&f*");
-  delay(1000);
+  delay(2000);
 
   // enable handsfree HFP + serial (SPP) profiles:
   btSerial.println("ats102=$0011");
-  delay(100);
+  delay(200);
 
   // configure the module to startup (and remain in) a  connectable state:
   btSerial.println("ats512=3");  // default to connectable (but not discoverable)
-  delay(100);
+  delay(200);
   btSerial.println("ats554=0");  // never time out of this state
-  delay(100);
+  delay(200);
 
   // specify that the device has no input/output capabilities (used to determine
   // how to handle Bluetooth pairing)
   btSerial.println("ats321=3");
-  delay(100);  
+  delay(200);  
   
   // when the host attempts to open the serial port, auto-answer after one ring
   btSerial.println("ats0=1");
-  delay(100);  
+  delay(200);  
   
   // enable the module's microphone pre-amp:
   btSerial.println("ats415=1");
-  delay(100);
+  delay(200);
 
   // set the device's permanent friendly name
   btSerial.print("at+btn=\"");
   btSerial.print(permanentName);
   btSerial.println("\"");
-  delay(100);
+  delay(200);
 
   // write the new settings to non-volatile memory:
   btSerial.println("at&w");
-  delay(1000);
+  delay(2000);
 
   // restart the module to have new settings take effect:
   btSerial.println("atz");
-  delay(1000);
+  delay(2000);
 }
 
