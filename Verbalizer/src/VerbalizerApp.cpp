@@ -353,7 +353,8 @@ void VerbalizerApp::onBluetoothDisconnect (IOBluetoothObjectRef &dev) {
 //--------------------------------------------------------------
 void VerbalizerApp::onSerialData (IOBluetoothRFCOMMDataBlock &data) {
 	
-	if (!data.dataSize || data.dataSize == 0 || data.dataPtr == NULL) {
+	if (data.dataSize == NULL || data.dataSize == 0 
+				|| data.dataPtr == NULL || data.dataPtr == 0) {
 		printf("onSerialData. No dataSize\n");
 		return;
 	}
@@ -362,7 +363,16 @@ void VerbalizerApp::onSerialData (IOBluetoothRFCOMMDataBlock &data) {
 	char my_data[size];
 	strcpy(my_data, (const char *)data.dataPtr);
 	
-	for (int i = 0; i < data.dataSize; i++) {
+	// We're getting some nasty values in data.dataSize sometime, where the size is 
+	// reported as extremly high or very low. A temporary fix is to test for the size 
+	// here and abort if it's very high.
+	// TODO: figure out the real reason why data.dataSize is reporting abnormal values.
+	if (size > 1024 || size < 0) {
+		printf("!! onSerialData: Aborting since we're getting sizes way higher than we're expecting.");
+		return;
+	}
+	
+	for (int i = 0; i < size - 1; i++) {
 		handleSerialDataCommand(my_data[i]);
 	}
 }
