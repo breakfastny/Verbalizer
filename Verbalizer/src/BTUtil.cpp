@@ -149,3 +149,13 @@ char *BTUtil::deviceAddress(IOBluetoothObjectRef dev) {
 	char *buf = const_cast<char *>(CFStringGetCStringPtr(dev_address, kCFStringEncodingMacRoman));
 	return buf;	
 }
+
+// Returns a Bluetooth device object for the c string address.
+IOBluetoothObjectRef BTUtil::deviceForAddress(const char *address) {
+	CFStringRef btAddressString = CFStringCreateWithCString(kCFAllocatorDefault, address, kCFStringEncodingUTF8);
+	BluetoothDeviceAddress *btAddressPtr;
+	IOBluetoothCFStringToDeviceAddress(btAddressString, btAddressPtr);
+	CFRelease(btAddressString);
+	IOBluetoothDeviceRef device = IOBluetoothDeviceCreateWithAddress(btAddressPtr);
+}
+

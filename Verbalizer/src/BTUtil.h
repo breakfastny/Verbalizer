@@ -53,6 +53,7 @@ public:
 	void closeConnection(IOBluetoothObjectRef dev);
 	char *deviceName(IOBluetoothObjectRef dev);
 	char *deviceAddress(IOBluetoothObjectRef dev);
+	IOBluetoothObjectRef deviceForAddress(const char *address);
 	
 	ofEvent<bool> createConnectionEvent;
 	ofEvent<IOBluetoothObjectRef> connectEvent;

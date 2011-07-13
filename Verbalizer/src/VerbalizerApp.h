@@ -30,6 +30,7 @@
 #pragma once
 
 #include <IOBluetooth/IOBluetoothUserLib.h>
+#include <IOBluetooth/IOBluetoothUtilities.h>
 
 #include "ofMain.h"
 #include "ofEvents.h"
@@ -53,16 +54,16 @@ static bool bluetoothConnected;
 // We are deliberatly avoiding characters from 7bit ASCII since that could 
 // be sent from the BTM112 bluetooth module.
 
-const char CMD_ACTIVATE		= 0x80;
-const char CMD_FINISHED		= 0x81;
-const char STATUS_ACTIVATED	= 0x82;
-const char STATUS_READY		= 0x83;
-const char STATUS_DONE		= 0x84;
-const char STATUS_CONNECTED	= 0x85;
-const char ACK_OK			= 0x86;
-const char ACK_BAD			= 0x87;
-const char HEARTBEAT        = 0x88;
-const char STATUS_DISCONNECT= 0x89;
+const char CMD_ACTIVATE		= 0x80; // Fired from Arudino to activate voice search
+const char CMD_FINISHED		= 0x81; // Finished activation of voice search (not implemented)
+const char STATUS_ACTIVATED	= 0x82; // Sent to Arduino if activation come from elsewhere (i.e. desktop app).
+const char STATUS_READY		= 0x83; // Found the Mic icon on site and ready to click it.
+const char STATUS_DONE		= 0x84; // Voice search session is over.
+const char STATUS_CONNECTED	= 0x85; // BT connected 
+const char ACK_OK			= 0x86; // Command acknowledged.
+const char ACK_BAD			= 0x87; // Command acknowledged but something went wrong.
+const char HEARTBEAT        = 0x88; // BT serial link still alive
+const char STATUS_DISCONNECT= 0x89; // BT disconnected
 
 //========================================================================
 class VerbalizerApp : public ofBaseApp {
@@ -72,6 +73,7 @@ class VerbalizerApp : public ofBaseApp {
 		void setup();
 		void update();
 		void draw();
+		void connectBluetooth();
 		void disconnectBluetooth();
 		void activateVoiceSearch();
 		void findAndClickIcon();
@@ -107,6 +109,7 @@ class VerbalizerApp : public ofBaseApp {
 		void onTimerClearLastInString(ofEventArgs &args);
 		void onTimerSearchDone(ofEventArgs &args);
 		void onTimerSendHeartbeat(ofEventArgs &args);
+		void onTimerAutoConnect(ofEventArgs &args);
 		
 		string xml_file;
 		ofxXmlSettings XML;
@@ -119,8 +122,10 @@ class VerbalizerApp : public ofBaseApp {
 		CBTimer timer_click;
 		CBTimer timer_search_done;
 		CBTimer timer_heartbeat;
+		CBTimer timer_autoconnect;
 		int page_load_check_counter;
 		int heartbeat_interval;
+	
 	
 		bool bt_audio_in;
 		bool bt_audio_out;
@@ -149,8 +154,8 @@ class VerbalizerApp : public ofBaseApp {
 		BTUtil btutil;
 		IOBluetoothDeviceRef device;
 		IOBluetoothRFCOMMChannelRef channel;
-		string device_name;
-		string device_address;
+		char * device_name;
+		char * device_address;
 		bool waiting_for_ack;
 		int command_send_tries;
 		CBTimer timer_command_ack;

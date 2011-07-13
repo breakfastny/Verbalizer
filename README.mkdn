@@ -1,11 +1,9 @@
-The Verbalizer
-==============
+## The Verbalizer
 
 The Verbalizer is an open source hardware and software platform originally built for activating and performing Google's Voice Search for desktop. The platform is developed with amatuers and home tinkeres in mind, so it's got a low barrier of entry. The hardware is [Arduino-Compatible](http://arduino.cc/) and the desktop software is build on top of [OpenFrameworks](http://www.openframeworks.cc/).
 
 
-Hardware
-========
+## Hardware
 
 The Verbalizer board is a microcontroller board based on ATMega328. It's Arduino-Compatible so all you need is a mini-USB cable and the Arduino IDE to start hacking. In addition to most of the features you normally expect from an Arduino board, it has an onboard bluetooth module (Liard BTM511) which supports audio profiles (HFP) and serial data (SPP) communication. It also features 2 built in capacitive touch sensors. 
 
@@ -13,8 +11,7 @@ The board operates at 3.3V and is best powered by a 3.6V lipo battery which can 
 
 Communication can be established either through the Bluetooth device or the onboard FTDI which channels serial data through USB. 
 
-Software
-========
+## Software
 
 Verbalizer.app runs on the desktop to receive commands from the board and executes the Voice Search in Chrome. It's currently developed for Mac OS X 10.6. The application connects over bluetooth to the the board and establishes an RFCOMM channel for serial data communication. There's a basic ASCII protocol between the app and the board where a client (either board or desktop app) sends a command and expects an `ACK_OK` status back. The ack protocol is implemented since messages and commands can easily
 get lost due to naive programming (such as sleep/delays which are common in the Arduino world) on the board. The uC is using a software serial implementation to talk to the bluetooth module, which means that some serial data can get lost.
@@ -25,8 +22,13 @@ To start developing the Desktop app, you'll need Xcode 3.2.5 or possibly later. 
 
 To successfully compile the arduino sketch the bundled NewSoftSerial and CapacitiveSense libraries will need to be installed. [How to install arduino libraries](http://www.arduino.cc/en/Hacking/Libraries).
 
-Contributors
-============
+## Change Log
+
+### Version 0.04 
+ - Added support for auto connect on startup.
+ - Various bug fixes
+
+## Contributors
 
 *   BREAKFAST
 *   Zach Eveland, Blacklabel Development

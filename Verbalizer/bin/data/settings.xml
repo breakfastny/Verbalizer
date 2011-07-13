@@ -26,12 +26,17 @@
 	
 	<!--==== ADVANCED SETTINGS ====-->
 	
+	<!-- autoconnect to this BT address -->
+	<autoconnect>1</autoconnect>
+	<autoconnect_address>00-16-a4-00-71-a5</autoconnect_address>
+	<autoconnect_name>Verbalizer XXX</autoconnect_name>
+	
     <!-- cvMatchTemplate min_loc to signify match -->
     <cv_min_loc>271652</cv_min_loc>
 	<!-- Number of tries to find satisfying match -->
     <cv_min_loc_tries>20</cv_min_loc_tries>
 	<!-- Timer between tries in milliseconds -->
-    <cv_min_loc_timout>300</cv_min_loc_timeout>
+    <cv_min_loc_timout>150</cv_min_loc_timeout>
 	<!-- ms to wait before sending command again if no ack has been received -->
 	<command_retry_interval>250</command_retry_interval>
     <!-- number of times to retry before giving up on ack -->
@@ -39,7 +44,6 @@
     <!-- ms between mouse click to done -->
 	<timer_search_done>6000</timer_search_done>	
 	<!-- ms between heartbeats -->
-	<timer_heartbeat>1500</timer_heartbeat>	
-	
+	<timer_heartbeat>1500</timer_heartbeat>
 	
 </settings>

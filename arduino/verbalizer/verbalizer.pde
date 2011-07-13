@@ -64,16 +64,16 @@ CapSense capSnsLeft = CapSense(18, 17);
 CapSense capSnsRight = CapSense(18, 19);
 
 // COMMANDS
-const char CMD_ACTIVATE		= 0x80;
-const char CMD_FINISHED		= 0x81;
-const char STATUS_ACTIVATED	= 0x82;
-const char STATUS_READY		= 0x83;
-const char STATUS_DONE		= 0x84;
-const char STATUS_CONNECTED	= 0x85;
-const char ACK_OK		= 0x86;
-const char ACK_BAD		= 0x87;
-const char HEARTBEAT            = 0x88;
-const char STATUS_DISCONNECT    = 0x89;
+const char CMD_ACTIVATE		= 0x80; // Fired from Arudino to activate voice search
+const char CMD_FINISHED		= 0x81; // Finished activation of voice search (not implemented)
+const char STATUS_ACTIVATED	= 0x82; // Sent to Arduino if activation come from elsewhere (i.e. desktop app).
+const char STATUS_READY		= 0x83; // Found the Mic icon on site and ready to click it.
+const char STATUS_DONE		= 0x84; // Voice search session is over.
+const char STATUS_CONNECTED	= 0x85; // BT connected 
+const char ACK_OK		= 0x86; // Command acknowledged.
+const char ACK_BAD		= 0x87; // Command acknowledged but something went wrong.
+const char HEARTBEAT            = 0x88; // BT serial link still alive
+const char STATUS_DISCONNECT    = 0x89; // BT disconnected
 
 void setup() {
   digitalWrite(vuLEDpin, LOW);

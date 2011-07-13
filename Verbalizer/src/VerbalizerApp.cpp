@@ -103,6 +103,13 @@ void VerbalizerApp::setup() {
 	ofAddListener(timer_heartbeat.time_up, this, &VerbalizerApp::onTimerSendHeartbeat);
 	
 	heartbeat_interval = XML.getValue("settings:timer_heartbeat", 1500);
+	
+	bool autoconnect = XML.getValue("settings:autoconnect", false);
+	if (autoconnect) {
+		ofAddListener(timer_autoconnect.time_up, this, &VerbalizerApp::onTimerAutoConnect);
+		timer_autoconnect.start(2000);
+		status_msg = "Preparing autoconnect..";
+	}
 }
 
 //--------------------------------------------------------------
@@ -127,6 +134,19 @@ void VerbalizerApp::draw() {
 	ofSetColor(255, 0, 0);
 	txt_error.drawString(error_msg, 348, 270);
 	ofPopStyle();	
+}
+
+//--------------------------------------------------------------
+void VerbalizerApp::connectBluetooth() {
+	error_msg = "";
+	if(btutil.connect(device)) {
+		printf("Trying to connect...\n");
+		status_msg = "Connecting..";
+		connect_btn.setBlur(true);
+	}else{
+		printf("error!\n");
+		status_msg = "Could not initiate connection attempt";
+	}	
 }
 
 //--------------------------------------------------------------
@@ -255,9 +275,9 @@ void VerbalizerApp::onTimerCheckPage(ofEventArgs &args) {
 	
 	// Tell board we're activating the mic
 	sendCommand(STATUS_READY, true);
-	usleep(1000 * 100); // wait half sec
+	usleep(1000 * 50); // wait 50ms
 	// Start the timer for clicking on the template
-	timer_click.start(XML.getValue("settings:activation_delay", 200));
+	timer_click.start(XML.getValue("settings:activation_delay", 100));
 	activated = false;
 }
 
@@ -288,6 +308,27 @@ void VerbalizerApp::onTimerSearchDone(ofEventArgs &args) {
 void VerbalizerApp::onTimerSendHeartbeat(ofEventArgs &args) {
 	sendSerialData(HEARTBEAT);
 	timer_heartbeat.start(heartbeat_interval); // loop heartbeat
+}
+
+//--------------------------------------------------------------
+void VerbalizerApp::onTimerAutoConnect(ofEventArgs &args) {
+	printf("onTimerAutoConnect");
+	// Should we auto connect to most recent device?
+	const char * auto_connect_address = XML.getValue("settings:autoconnect_address", "").c_str();
+	printf("auto connect address: %s\n", auto_connect_address);
+	if (auto_connect_address != "") {
+		device = btutil.deviceForAddress(const_cast<char *>(auto_connect_address));
+		if (device != NULL) {
+			disconnectBluetooth();
+			connect_btn.setBlur(false);
+			device_name = const_cast<char *>(XML.getValue("settings:autoconnect_name", "auto connected device").c_str());
+			printf("Auto selected device\n");
+			// auto connecting
+			connectBluetooth();
+		}else {
+			error_msg = "Could not autoconnect.";
+		}
+	}
 }
 
 //--------------------------------------------------------------
@@ -353,24 +394,21 @@ void VerbalizerApp::onBluetoothDisconnect (IOBluetoothObjectRef &dev) {
 //--------------------------------------------------------------
 void VerbalizerApp::onSerialData (IOBluetoothRFCOMMDataBlock &data) {
 	
-	if (data.dataSize == NULL || data.dataSize == 0 
-				|| data.dataPtr == NULL || data.dataPtr == 0) {
-		printf("onSerialData. No dataSize\n");
+	if (data.dataSize == NULL || data.dataPtr == NULL) {
+		printf("onSerialData. No data\n");
 		return;
 	}
 	
 	int size = data.dataSize+1;
+	
+	if (size > 1024 || size < 0) {
+		printf("!! onSerialData: Aborting since we're getting abnormal values");
+		return;
+	}	
+	
 	char my_data[size];
 	strcpy(my_data, (const char *)data.dataPtr);
 	
-	// We're getting some nasty values in data.dataSize sometime, where the size is 
-	// reported as extremly high or very low. A temporary fix is to test for the size 
-	// here and abort if it's very high.
-	// TODO: figure out the real reason why data.dataSize is reporting abnormal values.
-	if (size > 1024 || size < 0) {
-		printf("!! onSerialData: Aborting since we're getting sizes way higher than we're expecting.");
-		return;
-	}
 	
 	for (int i = 0; i < size - 1; i++) {
 		handleSerialDataCommand(my_data[i]);
@@ -440,15 +478,7 @@ void VerbalizerApp::onBluetoothSerialFlow(IOBluetoothRFCOMMFlowControlStatus &st
 //--------------------------------------------------------------
 void VerbalizerApp::onConnectBtn(ofPoint &p) {
 	printf("Click Connect\n");
-	error_msg = "";
-	if(btutil.connect(device)) {
-		printf("Trying to connect...\n");
-		status_msg = "Connecting..";
-		connect_btn.setBlur(true);
-	}else{
-		printf("error!\n");
-		status_msg = "Could not initiate connection attempt";
-	}
+	connectBluetooth();
 }
 
 //--------------------------------------------------------------
@@ -472,7 +502,6 @@ void VerbalizerApp::onSelectDeviceBtn(ofPoint &p) {
 		disconnectBluetooth();
 		connect_btn.setBlur(false);
 		device_name = btutil.deviceName(device);
-		device_address = btutil.deviceAddress(device);
 		printf("Selected device\n");
 	}else{
 		printf("No device selected\n");
