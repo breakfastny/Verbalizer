@@ -150,7 +150,7 @@ void loop() {
     delay(50);
   }
 
-  // ======== CAPACITIVE TOUCH EXAMPLE
+  // ======== CAPACITIVE TOUCH ACTIVATION
   // Get the current value from capacitive sensors
   long leftSns = capSnsLeft.capSense(30);
   long rightSns = capSnsRight.capSense(30);
@@ -165,78 +165,6 @@ void loop() {
     buttonPressed = false;
     finishActivation();
   }
-
-  
-  /*
-  // ======== FLEX SENSOR EXAMPLE
-  // Read the A0 sensor
-  int flex = analogRead(A0);
-  //Serial.println(flex);
-  // When user starts bending
-  if (flex > 850 && buttonPressed == false) {
-    analogWrite(vuLEDpin, 255); // turn on light
-    btSerial.print(CMD_ACTIVATE);
-    buttonPressed = true;
-    waitingForAck = true;
-  }
-  // Finish the activation when the user bends back flex
-  else if (flex < 800 && buttonPressed == true) {
-    btSerial.print(CMD_FINISHED);
-    buttonPressed = false;
-    waitingForAck = true;
-    // take down light
-    analogWrite(vuLEDpin, 0);
-  }
-  */
-  
-  /*  
-  // ======== IR EXAMPLE
-  // Read the A0 sensor
-  // we get values from around 900 down to 20. 
-  // map re-maps these values to a range from 0 to 100.
-  int ir = map(analogRead(A0), 900, 20, 0, 100);
-  //Serial.println(ir);
-  // When user puts finger on sensor
-  if (ir > 80 && buttonPressed == false) {
-    analogWrite(vuLEDpin, 255); // turn on light
-    btSerial.print(CMD_ACTIVATE);
-    buttonPressed = true;
-    waitingForAck = true;
-    Serial.println("activated");
-  }
-  // Finish the activation when the user removes finger
-  else if (ir < 70 && buttonPressed == true) {
-    btSerial.print(CMD_FINISHED);
-    buttonPressed = false;
-    waitingForAck = true;
-    // take down light
-    analogWrite(vuLEDpin, 0);
-    Serial.println("finished activation");
-  }
-  */  
-  
-  /*
-  // ======== PUSH BUTTON EXAMPLE
-  // We use a NC button
-  // Read the D8 sensor
-  // Attach it between D8 and GND
-  // it's either HIGH or LOW
-  int val = digitalRead(d8Pin);
-   // Finish the activation when the user removes finger
-  if (val == LOW && buttonPressed == true) {
-    btSerial.print(CMD_ACTIVATE);
-    buttonPressed = false;
-    waitingForAck = true;
-    Serial.println("activated");
-  }
-  else if (val == HIGH && buttonPressed == false) {
-    btSerial.print(CMD_FINISHED);
-    buttonPressed = true;
-    waitingForAck = true;
-    Serial.println("finished activation");
-  }
-  */
-  
   
   // ======== INCOMING SERIAL DATA
   // Look for serial data from Bluetooth chip
@@ -294,6 +222,12 @@ void loop() {
         lastHeartbeat = millis();
         isConnected = true;
         break;
+      
+      case '!': // test the light
+        analogWrite(vuLEDpin, 255);
+        delay(300);
+        analogWrite(vuLEDpin, 0);
+      break;
       
       default:
         break;
