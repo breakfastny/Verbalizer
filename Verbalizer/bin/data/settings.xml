@@ -27,7 +27,7 @@
 	<!--==== ADVANCED SETTINGS ====-->
 	
 	<!-- autoconnect to this BT address -->
-	<autoconnect>1</autoconnect>
+	<autoconnect>0</autoconnect>
 	<autoconnect_address>00-16-a4-00-71-a5</autoconnect_address>
 	<autoconnect_name>Verbalizer XXX</autoconnect_name>
 	
